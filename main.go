@@ -2,8 +2,11 @@ package main
 
 import (
 	"alcohol/controller"
+	"alcohol/middlewares"
 	"alcohol/service"
 	"github.com/gin-gonic/gin"
+	"io"
+	"os"
 )
 
 var (
@@ -11,16 +14,24 @@ var (
 	postController controller.PostController = controller.New(postService)
 )
 
-func main() {
-	r := gin.Default()
+func setupLogOutput() {
+	f, _ := os.Create("gin.log")
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+}
 
-	r.GET("/posts", func(ctx *gin.Context) {
+func main() {
+	setupLogOutput()
+
+	server := gin.New()
+	server.Use(gin.Recovery(), middlewares.Logger())
+
+	server.GET("/posts", func(ctx *gin.Context) {
 		ctx.JSON(200, postController.FindAll())
 	})
 
-	r.POST("/posts", func(ctx *gin.Context) {
+	server.POST("/posts", func(ctx *gin.Context) {
 		ctx.JSON(200, postController.Save(ctx))
 	})
 
-	r.Run()
+	server.Run()
 }
