@@ -5,6 +5,7 @@ import (
 	"alcohol/middlewares"
 	"alcohol/service"
 	"github.com/gin-gonic/gin"
+	gindump "github.com/tpkeeper/gin-dump"
 	"io"
 	"os"
 )
@@ -23,7 +24,7 @@ func main() {
 	setupLogOutput()
 
 	server := gin.New()
-	server.Use(gin.Recovery(), middlewares.Logger(), middlewares.BasicAuth())
+	server.Use(gin.Recovery(), middlewares.Logger(), middlewares.BasicAuth(), gindump.Dump())
 
 	server.GET("/posts", func(ctx *gin.Context) {
 		ctx.JSON(200, postController.FindAll())
